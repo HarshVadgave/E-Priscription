@@ -592,13 +592,10 @@
             <h3>👤 Patient Information</h3>
             <div class="form-grid">
                 <div class="form-group">
-                    <label>Patient ID</label>
+                    <label>Patient Name</label>
                     <input type="text" id="patientId" placeholder="696 - DEMO PATIENT">
                 </div>
-                <div class="form-group">
-                    <label>Patient Name *</label>
-                    <input type="text" id="patientName">
-                </div>
+               
                 <div class="form-group">
                     <label>Gender *</label>
                     <select id="patientGender">
@@ -691,7 +688,7 @@
             <div class="patient-info">
                 <div class="patient-left">
                     <div class="patient-details">
-                        <div class="patient-id" id="displayPatientId">ID: 266 - DEMO PATIENT (M)</div>
+                        <div class="patient-id" id="displayPatientId">Name: 266 - DEMO PATIENT (M)</div>
                         <div>Address: <span id="displayPatientAddress">PUNE</span></div>
                         <div>Temp (deg): <span id="displayTemp">98</span>, BP: <span id="displayBP">120/80</span> mmHg</div>
                     </div>
@@ -875,13 +872,12 @@
 
             // Patient Info
             const patientId = document.getElementById('patientId').value || '266 - DEMO PATIENT';
-            const patientName = document.getElementById('patientName').value || 'John Doe';
             const gender = document.getElementById('patientGender').value || 'M';
             const patientAddress = document.getElementById('patientAddress').value || 'PUNE';
             const temperature = document.getElementById('temperature').value || '98';
             const bp = document.getElementById('bp').value || '120/80';
 
-            document.getElementById('displayPatientId').textContent = `ID: ${patientId} (${gender})`;
+            document.getElementById('displayPatientId').textContent = `PATIENT NAME: ${patientId} (${gender})`;
             document.getElementById('displayPatientAddress').textContent = patientAddress;
             document.getElementById('displayTemp').textContent = temperature;
             document.getElementById('displayBP').textContent = bp;
@@ -1002,3 +998,4 @@ new QRCode(document.getElementById("qrcode"), {
 </script>
 </body>
 </html>
+

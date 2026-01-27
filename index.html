@@ -692,7 +692,7 @@
                 <div class="patient-left">
                     <div class="patient-details">
                         <div class="patient-id" id="displayPatientId">ID: 266 - DEMO PATIENT (M)</div>
-                        <label>Patient Name:</label><input type="text" id="patientName" placeholder="Enter patient name">
+                        <div class="patient-name" id="displayPatientName">Patient Name<div>
                         <div>Address: <span id="displayPatientAddress">PUNE</span></div>
                         <div>Temp (deg): <span id="displayTemp">98</span>, BP: <span id="displayBP">120/80</span> mmHg</div>
                     </div>
@@ -883,6 +883,7 @@
             const bp = document.getElementById('bp').value || '120/80';
 
             document.getElementById('displayPatientId').textContent = `ID: ${patientId} (${gender})`;
+            document.getElementById('displayPatientName').textContent = patientName;
             document.getElementById('displayPatientAddress').textContent = patientAddress;
             document.getElementById('displayTemp').textContent = temperature;
             document.getElementById('displayBP').textContent = bp;
@@ -1004,3 +1005,4 @@ new QRCode(document.getElementById("qrcode"), {
 </body>
 
 </html>
+

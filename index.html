@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Prescription Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #ffebc1;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Form Panel Styles */
+        .form-panel {
+            background: rgb(251, 254, 224);
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .form-panel h2 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 24px;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+
+        .form-panel h3 {
+            margin-top: 25px;
+            margin-bottom: 15px;
+            color: #555;
+            font-size: 18px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 10px;
+            border: 1px solid #ff8a0d;
+            border-radius: 4px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        /* Medicine Table */
+        .medicine-table {
+            width: 100%;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+        }
+
+        .medicine-table th {
+            background: #99ff1d;
+            color: rgb(0, 0, 0);
+            padding: 10px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .medicine-table td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .medicine-table input,
+        .medicine-table select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .medicine-row {
+            background: white;
+        }
+
+        .medicine-row:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-right: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #45a049;
+        }
+
+        .btn-secondary {
+            background: #2196F3;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #0b7dda;
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+
+        .btn-danger:hover {
+            background: #da190b;
+        }
+
+        .btn-add {
+            background: #FF9800;
+            color: white;
+        }
+
+        .btn-add:hover {
+            background: #e68900;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* Prescription Styles */
+        .prescription {
+            background: white;
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            padding: 15mm;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        /* Header */
+        .rx-header {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #000;
+            margin-bottom: 20px;
+        }
+
+        .header-left {
+            font-size: 14px;
+        }
+
+        .header-left .doctor-name {
+            font-weight: bold;
+            font-size: 16px;
+            color: #4CAF50;
+            margin-bottom: 3px;
+        }
+
+        .header-left .degree {
+            font-size: 12px;
+            margin-bottom: 3px;
+        }
+
+        .header-center {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .clinic-logo {
+           max-height: 70px;
+           max-width: 120px;
+            margin-bottom: 5px;
+        }
+
+        .clinic-name-center {
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header-right {
+            text-align: right;
+            font-size: 12px;
+        }
+
+        .header-right .clinic-name {
+            font-weight: bold;
+            font-size: 14px;
+            color: #4CAF50;
+            margin-bottom: 3px;
+        }
+
+        /* Patient Info */
+        .patient-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .patient-left {
+            flex: 1;
+        }
+
+        .barcode {
+            margin-bottom: 8px;
+        }
+
+        .barcode svg {
+            height: 40px;
+        }
+
+        .patient-details {
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .patient-id {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .patient-right {
+            text-align: right;
+            font-size: 13px;
+        }
+
+        .date-time {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        /* Prescription Body */
+
+        .medicines-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .medicines-table th {
+            border-bottom: 2px solid #000;
+            padding: 8px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .medicines-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #ddd;
+            font-size: 13px;
+            vertical-align: top;
+        }
+
+        .medicine-name {
+            font-weight: bold;
+        }
+
+        .dosage-details {
+            color: #333;
+            line-height: 1.5;
+        }
+
+        /* Advice Section */
+        .advice-section {
+            margin: 20px 0;
+            padding: 10px 0;
+            border-top: 1px solid #ddd;
+        }
+
+        .advice-section h4 {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .advice-content {
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-line;
+        }
+
+        /* Follow-up */
+        .follow-up {
+            font-weight: bold;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+
+        /* Signature */
+        .signature-area {
+            text-align: right;
+            margin-top: 50px;
+        }
+
+        .signature-line {
+            font-style: italic;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .signature-name {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .signature-degree {
+            font-size: 13px;
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .form-panel,
+            .button-group {
+                display: none !important;
+            }
+
+            .prescription {
+                box-shadow: none;
+                margin: 0;
+                padding: 15mm;
+                width: 210mm;
+                height: 297mm;
+            }
+
+            @page {
+                size: A4;
+                margin: 0;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 500px;
+  height: 500px;
+  transform: translate(-50%, -50%);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.09; /* perfect medical watermark */
+  z-index: 0;
+}
+
+/* Make sure content stays above watermark */
+.prescription * {
+  position: relative;
+  z-index: 2;
+}
+
+#watermark {
+  z-index: 1;
+}
+/* ========== RESPONSIVE WRAPPER ========== */
+.rx-wrapper {
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+}
+
+/* Default (Desktop) */
+.prescription {
+  transform-origin: top center;
+}
+
+/* ---------- Tablets ---------- */
+@media (max-width: 1024px) {
+  .prescription {
+    transform: scale(0.9);
+  }
+}
+
+/* ---------- Small Tablets ---------- */
+@media (max-width: 900px) {
+  .prescription {
+    transform: scale(0.85);
+  }
+}
+
+/* ---------- Large Phones ---------- */
+@media (max-width: 768px) {
+  .prescription {
+    transform: scale(0.8);
+  }
+
+  .rx-header {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .header-right {
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  .patient-info {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .patient-right {
+    text-align: left;
+  }
+}
+
+/* ---------- Small Phones ---------- */
+@media (max-width: 480px) {
+  .prescription {
+    transform: scale(0.7);
+  }
+
+  .form-panel {
+    padding: 15px;
+  }
+
+  .rx-symbol {
+    font-size: 36px;
+  }
+}
+@media (max-width: 600px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}
+@media print {
+  .prescription {
+    transform: none !important;
+  }
+}
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.medicine-table {
+  min-width: 800px; /* important */
+}
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  z-index: 9999;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  max-width: 320px;
+  margin: 10% auto;
+  border-radius: 8px;
+  text-align: center;
+}
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <!-- Form Panel -->
+        <div class="form-panel" id="formPanel">
+            <h2>E-Prescription</h2>
+
+            <h3>👨‍⚕️ Doctor & Clinic Information</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Doctor Name *</label>
+                    <input type="text" id="doctorName" placeholder="Dr. Harsh Vadgave">
+                </div>
+                <div class="form-group">
+                    <label>Qualifications *</label>
+                    <input type="text" id="qualifications" placeholder="M.B.B.S., M.D., M.S.">
+                </div>
+                <div class="form-group">
+                    <label>Registration No *</label>
+                    <input type="text" id="regNo" placeholder="XXXXXXX">
+                </div>
+                <div class="form-group">
+                    <label>Mobile No *</label>
+                    <input type="text" id="doctorMobile" placeholder="7841811323">
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Clinic Name *</label>
+                    <input type="text" id="clinicName" placeholder="Clinic">
+                </div>
+                <div class="form-group">
+                    <label>Clinic Logo</label>
+                    <input type="file" id="clinicLogoInput" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label>Clinic Address *</label>
+                    <textarea id="clinicAddress" placeholder="Clinic Address will be here"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Clinic Phone *</label>
+                    <input type="text" id="clinicPhone" placeholder="7841811323">
+                </div>
+                <div class="form-group">
+                    <label>Timings *</label>
+                    <input type="text" id="timings" placeholder="09:00 AM - 02:00 PM">
+                </div>
+                <div class="form-group">
+                    <label>Closed Day</label>
+                    <input type="text" id="closedDay" placeholder="Thursday">
+                </div>
+            </div>
+
+            <h3>👤 Patient Information</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Patient ID</label>
+                    <input type="text" id="patientId" placeholder="696 - DEMO PATIENT">
+                </div>
+                <div class="form-group">
+                    <label>Patient Name *</label>
+                    <input type="text" id="patientName">
+                </div>
+                <div class="form-group">
+                    <label>Gender *</label>
+                    <select id="patientGender">
+                        <option value="M">Male (M)</option>
+                        <option value="F">Female (F)</option>
+                        <option value="O">Other (O)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <input type="text" id="patientAddress" placeholder="MUMBAI">
+                </div>
+                <div class="form-group">
+                    <label>Temperature (°F)</label>
+                    <input type="text" id="temperature" placeholder="98">
+                </div>
+                <div class="form-group">
+                    <label>BP (mmHg)</label>
+                    <input type="text" id="bp" placeholder="120/80">
+                </div>
+                <div class="form-group">
+                    <label>Date & Time</label>
+                    <input type="datetime-local" id="dateTime">
+                </div>
+            </div>
+
+            <h3>💊 Medicines</h3>
+            <div class="table-wrapper">
+            <table class="medicine-table" id="medicineTable">
+                <thead>
+                    <tr>
+                        <th style="width: 5%">#</th>
+                        <th style="width: 25%">Medicine Name</th>
+                        <th style="width: 30%">Dosage Instructions</th>
+                        <th style="width: 15%">Duration (Days)</th>
+                        <th style="width: 15%">Total</th>
+                        <th style="width: 10%">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="medicineRows">
+                </tbody>
+            </table>
+            </div>
+            <button class="btn btn-add" onclick="addMedicineRow()">+ Add Medicine</button>
+
+            <h3>📝 Advice</h3>
+            <div class="form-group">
+                <label>Advice Given</label>
+                <textarea id="advice" placeholder="* AVOID OILY AND SPICY FOOD" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Follow-up Date</label>
+                <input type="date" id="followUpDate">
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="generatePrescription()">📄 Generate Prescription</button>
+                <button class="btn btn-secondary" onclick="printPrescription()">🖨️ Print</button>
+                <button class="btn btn-secondary" onclick="openDonate()">☕ Support / Donate</button>
+
+            </div>
+        </div>
+
+        <!-- Prescription -->
+         
+        <div class="prescription" id="prescription">
+              <!-- Watermark -->
+              <div id="watermark"></div>
+            <!-- Header -->
+            <div class="rx-header">
+                <div class="header-left">
+                    <div class="doctor-name" id="displayDoctorName">Dr. Harsh Vadgave</div>
+                    <div class="degree" id="displayDegree">M.B.B.S., M.D., M.S. | Reg. No: XXXXXXX</div>
+                    <div>Mob. No: <span id="displayDoctorMobile">7841811323</span></div>
+                </div>
+               <div class="header-center">
+                <img id="clinicLogo" class="clinic-logo" alt="Clinic Logo">
+                <div class="clinic-name-center" id="displayClinicNameCenter">LOREM IPSUM</div>
+                </div>
+
+                <div class="header-right">
+                    <div class="clinic-name" id="displayClinicName">Care Clinic</div>
+                    <div id="displayClinicAddress">Clinic Address will be here<br>4XXXXX</div>
+                    <div>Ph: <span id="displayClinicPhone">7841811323</span>, Timing: <span id="displayTimings">09:00<br>AM - 02:00 PM</span> | Closed: <span id="displayClosedDay">Thursday</span></div>
+                </div>
+            </div>
+
+            <!-- Patient Info -->
+            <div class="patient-info">
+                <div class="patient-left">
+                    <div class="patient-details">
+                        <div class="patient-id" id="displayPatientId">ID: 266 - DEMO PATIENT (M)</div>
+                        <div>Address: <span id="displayPatientAddress">PUNE</span></div>
+                        <div>Temp (deg): <span id="displayTemp">98</span>, BP: <span id="displayBP">120/80</span> mmHg</div>
+                    </div>
+                </div>
+                <div class="patient-right">
+                    <div class="date-time" id="displayDateTime">Date: 27-Apr-2020, 04:37 PM</div>
+                </div>
+            </div>
+
+            <!-- Medicines Table -->
+            <table class="medicines-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40%">Medicine Name</th>
+                        <th style="width: 35%">Dosage</th>
+                        <th style="width: 25%">Duration</th>
+                    </tr>
+                </thead>
+                <tbody id="displayMedicines">
+                    <tr>
+                        <td class="medicine-name">1) TAB. DEMO MEDICINE 1</td>
+                        <td class="dosage-details">1 Morning, 1 Night<br>(Before Food)</td>
+                        <td>10 Days<br>(Tot:20 Tab)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Advice -->
+            <div class="advice-section">
+                <h4>Advice Given:</h4>
+                <div class="advice-content" id="displayAdvice">* No Advice by the doctor still. </div>
+            </div>
+
+            <!-- Follow-up -->
+            <div class="follow-up" id="displayFollowUp">Follow Up: __-__-____</div>
+
+            <!-- Signature -->
+            <div class="signature-area">
+                <div class="signature-line">Signature</div>
+                <div class="signature-name" id="displaySignatureName">Dr. Harsh Vadgave</div>
+                <div class="signature-degree" id="displaySignatureDegree">M.B.B.S., M.D., M.S.</div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="donateModal" class="modal">
+  <div class="modal-content">
+    <h3>Support this project</h3>
+    <p>This tool is shared freely.  
+    If it helped you, you can support its development.</p>
+
+    <div id="qrcode"></div>
+
+    <a 
+  href="upi://pay?pa=vadagavejyoti@okaxis&pn=Vadgave%20Jyoti"
+  class="btn btn-primary"
+  style="text-decoration:none; display:inline-block;"
+>
+📱 Pay via UPI App
+</a>
+
+    <p style="font-size:12px;color:#666;">
+      UPI ID: vadagavejyoti@okaxis
+    </p>
+
+    <button class="btn btn-primary" onclick="closeDonate()">Close</button>
+  </div>
+</div>
+
+    <script>
+        // Initialize
+        let medicineCount = 0;
+
+        // Load saved data
+        window.onload = function() {
+            loadDoctorData();
+            setCurrentDateTime();
+            addMedicineRow(); // Add initial row
+        };
+
+        function loadDoctorData() {
+            const doctorData = localStorage.getItem('doctorData');
+            if (doctorData) {
+                const data = JSON.parse(doctorData);
+                document.getElementById('doctorName').value = data.doctorName || '';
+                document.getElementById('qualifications').value = data.qualifications || '';
+                document.getElementById('regNo').value = data.regNo || '';
+                document.getElementById('doctorMobile').value = data.doctorMobile || '';
+                document.getElementById('clinicName').value = data.clinicName || '';
+                document.getElementById('clinicAddress').value = data.clinicAddress || '';
+                document.getElementById('clinicPhone').value = data.clinicPhone || '';
+                document.getElementById('timings').value = data.timings || '';
+                document.getElementById('closedDay').value = data.closedDay || '';
+            }
+        }
+
+        function saveDoctorData() {
+            const data = {
+                doctorName: document.getElementById('doctorName').value,
+                qualifications: document.getElementById('qualifications').value,
+                regNo: document.getElementById('regNo').value,
+                doctorMobile: document.getElementById('doctorMobile').value,
+                clinicName: document.getElementById('clinicName').value,
+                clinicAddress: document.getElementById('clinicAddress').value,
+                clinicPhone: document.getElementById('clinicPhone').value,
+                timings: document.getElementById('timings').value,
+                closedDay: document.getElementById('closedDay').value
+            };
+            localStorage.setItem('doctorData', JSON.stringify(data));
+        }
+
+        function setCurrentDateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('dateTime').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        function addMedicineRow() {
+            medicineCount++;
+            const tbody = document.getElementById('medicineRows');
+            const row = document.createElement('tr');
+            row.className = 'medicine-row';
+            row.innerHTML = `
+                <td>${medicineCount}</td>
+                <td><input type="text" placeholder="TAB./CAP./SYR. Medicine Name" data-field="name"></td>
+                <td><input type="text" placeholder="1 Morning, 1 Night (Before Food)" data-field="dosage"></td>
+                <td><input type="number" placeholder="10" data-field="duration"></td>
+                <td><input type="text" placeholder="Tot:20 Tab" data-field="total"></td>
+                <td><button class="btn btn-danger" onclick="removeMedicineRow(this)">✕</button></td>
+            `;
+            tbody.appendChild(row);
+        }
+
+        function removeMedicineRow(btn) {
+            const row = btn.closest('tr');
+            row.remove();
+            updateMedicineNumbers();
+        }
+
+        function updateMedicineNumbers() {
+            const rows = document.querySelectorAll('#medicineRows tr');
+            rows.forEach((row, index) => {
+                row.querySelector('td:first-child').textContent = index + 1;
+            });
+            medicineCount = rows.length;
+        }
+
+        function generatePrescription() {
+            saveDoctorData();
+
+            // Doctor Info
+            const doctorName = document.getElementById('doctorName').value || 'Dr. Onkar Bhave';
+            const qualifications = document.getElementById('qualifications').value || 'M.B.B.S., M.D., M.S.';
+            const regNo = document.getElementById('regNo').value || '2709881';
+            const doctorMobile = document.getElementById('doctorMobile').value || '8983390126';
+
+            document.getElementById('displayDoctorName').textContent = doctorName;
+            document.getElementById('displayDegree').textContent = `${qualifications} | Reg. No: ${regNo}`;
+            document.getElementById('displayDoctorMobile').textContent = doctorMobile;
+            document.getElementById('displaySignatureName').textContent = doctorName;
+            document.getElementById('displaySignatureDegree').textContent = qualifications;
+
+            // Clinic Info
+            const clinicName = document.getElementById('clinicName').value || 'Care Clinic';
+            const clinicAddress = document.getElementById('clinicAddress').value || 'Near Axis Bank, Kothrud, Pune - 411038';
+            const clinicPhone = document.getElementById('clinicPhone').value || '094233 80390';
+            const timings = document.getElementById('timings').value || '09:00 AM - 02:00 PM';
+            const closedDay = document.getElementById('closedDay').value || 'Thursday';
+
+            document.getElementById('displayClinicName').textContent = clinicName;
+            document.getElementById('displayClinicNameCenter').textContent = clinicName.toUpperCase();
+            document.getElementById('displayClinicAddress').innerHTML = clinicAddress.replace(/\n/g, '<br>');
+            document.getElementById('displayClinicPhone').textContent = clinicPhone;
+            document.getElementById('displayTimings').innerHTML = timings.replace(/-/g, '<br>');
+            document.getElementById('displayClosedDay').textContent = closedDay;
+
+            // Patient Info
+            const patientId = document.getElementById('patientId').value || '266 - DEMO PATIENT';
+            const patientName = document.getElementById('patientName').value || 'John Doe';
+            const gender = document.getElementById('patientGender').value || 'M';
+            const patientAddress = document.getElementById('patientAddress').value || 'PUNE';
+            const temperature = document.getElementById('temperature').value || '98';
+            const bp = document.getElementById('bp').value || '120/80';
+
+            document.getElementById('displayPatientId').textContent = `ID: ${patientId} (${gender})`;
+            document.getElementById('displayPatientAddress').textContent = patientAddress;
+            document.getElementById('displayTemp').textContent = temperature;
+            document.getElementById('displayBP').textContent = bp;
+
+            // Date Time
+            const dateTimeInput = document.getElementById('dateTime').value;
+            if (dateTimeInput) {
+                const dt = new Date(dateTimeInput);
+                const formatted = formatDateTime(dt);
+                document.getElementById('displayDateTime').textContent = `Date: ${formatted}`;
+            }
+
+            // Medicines
+            const medicineRows = document.querySelectorAll('#medicineRows tr');
+            const displayMedicines = document.getElementById('displayMedicines');
+            displayMedicines.innerHTML = '';
+
+            medicineRows.forEach((row, index) => {
+                const name = row.querySelector('[data-field="name"]').value;
+                const dosage = row.querySelector('[data-field="dosage"]').value;
+                const duration = row.querySelector('[data-field="duration"]').value;
+                const total = row.querySelector('[data-field="total"]').value;
+
+                if (name) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="medicine-name">${index + 1}) ${name}</td>
+                        <td class="dosage-details">${dosage.replace(/,/g, ',<br>')}</td>
+                        <td>${duration} Days<br>${total}</td>
+                    `;
+                    displayMedicines.appendChild(tr);
+                }
+            });
+
+            // Advice
+            const advice = document.getElementById('advice').value || '* AVOID OILY AND SPICY FOOD';
+            document.getElementById('displayAdvice').textContent = advice;
+
+            // Follow-up
+            const followUpDate = document.getElementById('followUpDate').value;
+            if (followUpDate) {
+                const followUpFormatted = formatDate(new Date(followUpDate));
+                document.getElementById('displayFollowUp').textContent = `Follow Up: ${followUpFormatted}`;
+            } else {
+                document.getElementById('displayFollowUp').textContent = '';
+            }
+
+            // Scroll to prescription
+            document.getElementById('prescription').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function formatDateTime(date) {
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = months[date.getMonth()];
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${day}-${month}-${year}, ${hours}:${minutes} ${date.getHours() >= 12 ? 'PM' : 'AM'}`;
+        }
+
+        function formatDate(date) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}-${month}-${year}`;
+        }
+
+       
+
+        function printPrescription() {
+            window.print();
+        }
+
+
+        const logoInput = document.getElementById("clinicLogoInput");
+        const clinicLogo = document.getElementById("clinicLogo");
+        const watermark = document.getElementById("watermark");
+
+
+
+        /* Load saved logo */
+        const savedLogo = localStorage.getItem("clinicLogo");
+if (savedLogo && clinicLogo) {
+    clinicLogo.src = savedLogo;
+    watermark.style.backgroundImage = `url(${savedLogo})`;
+}
+
+        /* Upload logo */
+        logoInput.addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+        const img = reader.result;
+
+        clinicLogo.src = img;
+        watermark.style.backgroundImage = `url(${img})`;
+
+        localStorage.setItem("clinicLogo", img);
+    };
+    reader.readAsDataURL(file);
+});
+
+function openDonate() {
+  document.getElementById("donateModal").style.display = "block";
+}
+function closeDonate() {
+  document.getElementById("donateModal").style.display = "none";
+}
+
+new QRCode(document.getElementById("qrcode"), {
+  text: "upi://pay?pa=vadagavejyoti@okaxis&pn=Vadagave%20Jyoti",
+  width: 180,
+  height: 180
+});
+</script>
+</body>
+</html>

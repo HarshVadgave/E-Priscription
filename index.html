@@ -1,223 +1,607 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>E-Prescription Web App | Online Prescription Generator</title>
+   <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Prescription Web App | Online Prescription Generator</title>
     <meta name="description" content="Create professional prescriptions online with auto-filled doctor & clinic details, manual signature area, and downloadable PDF.">
-  <meta name="keywords" content="E-Prescription, online prescription, doctor app, PDF prescription, medical app">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <meta name="keywords" content="E-Prescription, online prescription, doctor app, PDF prescription, medical app">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
-
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+    
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        
+        }
+
+        :root {
+            --primary-color: #0066cc;
+            --primary-dark: #0052a3;
+            --primary-light: #3385d6;
+            --secondary-color: #00a67e;
+            --secondary-dark: #008c6a;
+            --accent-color: #ff6b35;
+            --danger-color: #e63946;
+            --warning-color: #f77f00;
+            --success-color: #06d6a0;
+            --bg-light: #f5f7fa;
+            --bg-white: #ffffff;
+            --text-dark: #1a202c;
+            --text-medium: #4a5568;
+            --text-light: #718096;
+            --border-color: #e2e8f0;
+            --border-dark: #cbd5e0;
+            --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+
+        /* Dark Mode Variables */
+        [data-theme="dark"] {
+            --bg-light: #1a202c;
+            --bg-white: #2d3748;
+            --text-dark: #f7fafc;
+            --text-medium: #e2e8f0;
+            --text-light: #cbd5e0;
+            --border-color: #4a5568;
+            --border-dark: #718096;
         }
 
         body {
-            font-family: 'Inter', system-ui, sans-serif;
-            background: #ffebc1;
-            padding: 20px;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+            padding: 0;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Header Banner */
+        .app-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            border-bottom: 4px solid var(--primary-dark);
+            position: relative;
+        }
+
+        .app-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .app-header p {
+            opacity: 0.95;
+            font-size: 1rem;
+        }
+
+        .app-header .stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Dark Mode Toggle */
+        .dark-mode-toggle {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: all 0.3s;
+        }
+
+        .dark-mode-toggle:hover {
+            background: rgba(255,255,255,0.3);
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Quick Actions Bar */
+        .quick-actions {
+            background: var(--bg-white);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--border-color);
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .quick-actions label {
+            font-weight: 600;
+            color: var(--text-dark);
         }
 
         /* Form Panel Styles */
         .form-panel {
-            background: rgb(251, 254, 224);
-            padding: 30px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: var(--bg-white);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--border-color);
         }
 
         .form-panel h2 {
-            margin-bottom: 20px;
-            color: #333;
-            font-size: 24px;
-            border-bottom: 2px solid #4CAF50;
-            padding-bottom: 10px;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+            font-size: 1.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .form-panel h3 {
-            margin-top: 25px;
-            margin-bottom: 15px;
-            color: #555;
-            font-size: 18px;
+        .section-header {
+            margin-top: 2rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid var(--primary-color);
+            color: var(--text-dark);
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
         }
 
         .form-group {
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         .form-group label {
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
-            font-size: 14px;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.875rem;
+            letter-spacing: 0.01em;
         }
 
         .form-group input,
         .form-group textarea,
         .form-group select {
-            padding: 10px;
-            border: 1px solid #ff8a0d;
-            border-radius: 4px;
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 14px;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9375rem;
+            transition: all 0.2s;
+            background: var(--bg-white);
+            color: var(--text-dark);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
         }
 
         .form-group textarea {
             resize: vertical;
-            min-height: 60px;
+            min-height: 80px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Autocomplete Dropdown */
+        .autocomplete-items {
+            position: absolute;
+            border: 2px solid var(--border-color);
+            border-top: none;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            background: var(--bg-white);
+            border-radius: 0 0 8px 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .autocomplete-items div {
+            padding: 0.75rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-dark);
+        }
+
+        .autocomplete-items div:hover {
+            background-color: var(--primary-light);
+            color: white;
         }
 
         /* Medicine Table */
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
         .medicine-table {
             width: 100%;
-            margin-bottom: 20px;
+            min-width: 800px;
             border-collapse: collapse;
+            background: var(--bg-white);
+        }
+
+        .medicine-table thead {
+            background: var(--primary-color);
+            color: white;
         }
 
         .medicine-table th {
-            background: #99ff1d;
-            color: rgb(0, 0, 0);
-            padding: 10px;
+            padding: 1rem;
             text-align: left;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .medicine-table td {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
+            padding: 0.875rem;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .medicine-table input,
         .medicine-table select {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-family: 'Times New Roman', Times, serif;
+            padding: 0.625rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+            background: var(--bg-white);
+            color: var(--text-dark);
+        }
+
+        .medicine-table input:focus {
+            outline: none;
+            border-color: var(--primary-color);
         }
 
         .medicine-row {
-            background: white;
+            background: var(--bg-white);
+            transition: background-color 0.2s;
         }
 
-        .medicine-row:nth-child(even) {
-            background: #f9f9f9;
+        .medicine-row:hover {
+            background: #f0f9ff;
         }
 
+        /* Buttons */
         .btn {
-            padding: 12px 24px;
+            padding: 0.75rem 1.5rem;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            margin-right: 10px;
-            transition: all 0.3s;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn:active {
+            transform: translateY(0);
         }
 
         .btn-primary {
-            background: #4CAF50;
+            background: var(--primary-color);
             color: white;
         }
 
         .btn-primary:hover {
-            background: #45a049;
+            background: var(--primary-dark);
         }
 
         .btn-secondary {
-            background: #2196F3;
+            background: var(--secondary-color);
             color: white;
         }
 
         .btn-secondary:hover {
-            background: #0b7dda;
+            background: var(--secondary-dark);
         }
 
         .btn-danger {
-            background: #f44336;
+            background: var(--danger-color);
             color: white;
-            padding: 8px 12px;
-            font-size: 14px;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
         }
 
         .btn-danger:hover {
-            background: #da190b;
+            background: #c41e29;
         }
 
         .btn-add {
-            background: #FF9800;
+            background: var(--warning-color);
             color: white;
         }
 
         .btn-add:hover {
-            background: #e68900;
+            background: #d66d00;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #05b382;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
         }
 
         .button-group {
             display: flex;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 1rem;
+            margin-top: 2rem;
             flex-wrap: wrap;
         }
 
-        /* Prescription Styles */
-        .prescription {
-            background: white;
-            width: 210mm;
-            min-height: 297mm;
-            margin: 0 auto;
-            padding: 15mm;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            position: relative;
+        /* Prescription History Sidebar */
+        .history-sidebar {
+            position: fixed;
+            right: -400px;
+            top: 0;
+            width: 400px;
+            height: 100vh;
+            background: var(--bg-white);
+            box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            border-left: 3px solid var(--primary-color);
         }
 
-        /* Header */
+        .history-sidebar.open {
+            right: 0;
+        }
+
+        .history-header {
+            padding: 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .history-header h3 {
+            font-size: 1.25rem;
+        }
+
+        .close-history {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .history-content {
+            padding: 1rem;
+        }
+
+        .history-item {
+            background: var(--bg-light);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            border: 2px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .history-item:hover {
+            border-color: var(--primary-color);
+            transform: translateX(-5px);
+        }
+
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.5rem;
+        }
+
+        .history-item-title {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .history-item-date {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .history-item-details {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        /* Prescription Preview Container */
+        .prescription-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow-xl);
+            border: none;
+            margin-bottom: 2rem;
+        }
+
+        .prescription-container h2 {
+            color: white;
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .prescription-wrapper {
+            display: flex;
+            justify-content: flex-start;
+            overflow-x: auto;
+            overflow-y: hidden;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+        }
+
+        /* Custom scrollbar */
+        .prescription-wrapper::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .prescription-wrapper::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+
+        .prescription-wrapper::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.4);
+            border-radius: 4px;
+        }
+
+        .prescription-wrapper::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.6);
+        }
+
+        /* Prescription - ALWAYS SAME SIZE */
+        .prescription {
+            background: #fefefe;
+            width: 210mm;
+            min-width: 210mm;
+            max-width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            position: relative;
+            font-family: 'Times New Roman', 'Lora', Georgia, serif;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            color: #222;
+            border: 1px solid #ddd;
+            flex-shrink: 0;
+            margin: 0 auto;
+        }
+
+        /* Watermark */
+        #watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 400px;
+            height: 400px;
+            transform: translate(-50%, -50%);
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            opacity: 0.04;
+            z-index: 1;
+        }
+
+        .prescription > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Header - FIXED LAYOUT FOR ALL DEVICES */
         .rx-header {
             display: grid;
             grid-template-columns: 1fr auto 1fr;
-            gap: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #000;
-            margin-bottom: 20px;
+            gap: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #333;
+            margin-bottom: 1.25rem;
+            align-items: start;
+            min-width: 0;
         }
 
         .header-left {
-            font-size: 14px;
+            font-size: 0.85rem;
+            line-height: 1.7;
+            text-align: left;
         }
 
         .header-left .doctor-name {
-            font-weight: bold;
-            font-size: 16px;
-            color: #4CAF50;
-            margin-bottom: 3px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #2c3e50;
+            margin-bottom: 0.2rem;
         }
 
         .header-left .degree {
-            font-size: 12px;
-            margin-bottom: 3px;
+            font-size: 0.8rem;
+            color: #555;
+            margin-bottom: 0.2rem;
         }
 
         .header-center {
@@ -225,171 +609,423 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: flex-start;
         }
 
         .clinic-logo {
-           max-height: 70px;
-           max-width: 120px;
-            margin-bottom: 5px;
+            max-height: 70px;
+            max-width: 120px;
+            margin-bottom: 0.4rem;
+            object-fit: contain;
         }
 
         .clinic-name-center {
-            font-size: 11px;
-            font-weight: bold;
+            font-size: 0.8rem;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.05em;
+            color: #333;
         }
 
         .header-right {
             text-align: right;
-            font-size: 12px;
+            font-size: 0.8rem;
+            line-height: 1.7;
         }
 
         .header-right .clinic-name {
-            font-weight: bold;
-            font-size: 14px;
-            color: #4CAF50;
-            margin-bottom: 3px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #2c3e50;
+            margin-bottom: 0.2rem;
         }
 
-        /* Patient Info */
+        /* Patient Info - FIXED LAYOUT FOR ALL DEVICES */
         .patient-info {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 20px;
-            padding: 10px 0;
+            flex-wrap: nowrap;
+            margin-bottom: 1.25rem;
+            padding: 0.75rem 0;
             border-bottom: 1px solid #ddd;
+            gap: 1rem;
         }
 
         .patient-left {
             flex: 1;
-        }
-
-        .barcode {
-            margin-bottom: 8px;
-        }
-
-        .barcode svg {
-            height: 40px;
+            min-width: 0;
         }
 
         .patient-details {
-            font-size: 13px;
-            line-height: 1.6;
+            font-size: 0.85rem;
+            line-height: 1.7;
+            color: #333;
         }
 
         .patient-id {
-            font-weight: bold;
-            margin-bottom: 3px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 0.2rem;
         }
 
         .patient-right {
             text-align: right;
-            font-size: 13px;
+            font-size: 0.85rem;
+            flex-shrink: 0;
         }
 
         .date-time {
-            font-weight: bold;
-            margin-bottom: 8px;
+            font-weight: 600;
+            color: #222;
+            white-space: nowrap;
         }
 
-        /* Prescription Body */
-
+        /* Medicines Table */
         .medicines-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-bottom: 1.25rem;
         }
 
         .medicines-table th {
-            border-bottom: 2px solid #000;
-            padding: 8px;
+            border-bottom: 2px solid #333;
+            padding: 0.6rem 0.5rem;
             text-align: left;
-            font-weight: bold;
-            font-size: 14px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #222;
         }
 
         .medicines-table td {
-            padding: 10px 8px;
+            padding: 0.75rem 0.5rem;
             border-bottom: 1px solid #ddd;
-            font-size: 13px;
+            font-size: 0.85rem;
             vertical-align: top;
+            line-height: 1.6;
+            color: #333;
         }
 
         .medicine-name {
-            font-weight: bold;
+            font-weight: 600;
+            color: #222;
         }
 
         .dosage-details {
             color: #333;
-            line-height: 1.5;
         }
 
         /* Advice Section */
         .advice-section {
-            margin: 20px 0;
-            padding: 10px 0;
+            margin: 1.25rem 0;
+            padding: 0.75rem 0;
             border-top: 1px solid #ddd;
         }
 
         .advice-section h4 {
-            font-weight: bold;
-            margin-bottom: 8px;
-            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            font-size: 0.85rem;
+            color: #222;
         }
 
         .advice-content {
-            font-size: 13px;
-            line-height: 1.6;
+            font-size: 0.8rem;
+            line-height: 1.7;
             white-space: pre-line;
+            color: #333;
         }
 
         /* Follow-up */
         .follow-up {
-            font-weight: bold;
-            margin: 15px 0;
-            font-size: 13px;
+            font-weight: 600;
+            margin: 1.25rem 0;
+            font-size: 0.85rem;
+            color: #333;
         }
 
         /* Signature */
         .signature-area {
             text-align: right;
-            margin-top: 50px;
+            margin-top: 3rem;
         }
 
         .signature-line {
             font-style: italic;
-            font-size: 18px;
-            margin-bottom: 10px;
+            font-size: 1.1rem;
+            margin-bottom: 0.6rem;
+            color: #555;
         }
 
         .signature-name {
-            font-weight: bold;
-            font-size: 14px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #222;
         }
 
         .signature-degree {
-            font-size: 13px;
+            font-size: 0.8rem;
+            color: #555;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(26, 32, 44, 0.75);
+            z-index: 9999;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: var(--bg-white);
+            padding: 2rem;
+            max-width: 400px;
+            margin: 10% auto;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: var(--shadow-xl);
+            border: 2px solid var(--border-color);
+        }
+
+        .modal-content h3 {
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+            font-size: 1.5rem;
+        }
+
+        .modal-content p {
+            margin-bottom: 1.5rem;
+            color: var(--text-light);
+        }
+
+        #qrcode {
+            display: flex;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--success-color);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow-xl);
+            z-index: 10000;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        .toast.error {
+            background: var(--danger-color);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Preview Title */
+        .preview-title {
+            color: white;
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            font-weight: 600;
+        }
+
+        .scroll-hint {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.875rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        @media (max-width: 900px) {
+            .scroll-hint {
+                display: block;
+            }
+        }
+
+        /* Disclaimer */
+        .disclaimer {
+            background: #fff3cd;
+            border-left: 4px solid var(--warning-color);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 2rem;
+            font-size: 0.875rem;
+            color: #856404;
+        }
+
+        .disclaimer strong {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .app-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .prescription-container {
+                padding: 1.5rem;
+            }
+
+            .prescription-wrapper {
+                padding: 1rem;
+            }
+
+            .patient-info {
+                flex-wrap: nowrap;
+            }
+
+            .history-sidebar {
+                width: 100%;
+                right: -100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .form-panel {
+                padding: 1.5rem;
+            }
+
+            .prescription-container {
+                padding: 1rem;
+            }
+
+            .prescription-wrapper {
+                padding: 0.5rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .quick-actions {
+                flex-direction: column;
+            }
+
+            .dark-mode-toggle {
+                top: 0.5rem;
+                right: 0.5rem;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .app-header {
+                padding: 1.5rem 1rem;
+            }
+
+            .app-header h1 {
+                font-size: 1.25rem;
+            }
+
+            .app-header p {
+                font-size: 0.875rem;
+            }
+
+            .app-header .stats {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .prescription-wrapper {
+                padding: 0.5rem;
+            }
+
+            .form-panel h2 {
+                font-size: 1.25rem;
+            }
+
+            .section-header {
+                font-size: 1rem;
+            }
         }
 
         /* Print Styles */
         @media print {
             body {
-                background: white;
-                padding: 0;
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
             }
 
+            .app-header,
             .form-panel,
-            .button-group {
+            .button-group,
+            .quick-actions,
+            .history-sidebar,
+            .disclaimer,
+            .toast {
                 display: none !important;
             }
 
+            .prescription-container {
+                background: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+                page-break-after: avoid !important;
+            }
+
+            .prescription-container h2,
+            .scroll-hint {
+                display: none !important;
+            }
+
+            .prescription-wrapper {
+                overflow: visible !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                background: none !important;
+                display: block !important;
+            }
+
             .prescription {
-                box-shadow: none;
-                margin: 0;
-                padding: 15mm;
-                width: 210mm;
-                height: 297mm;
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding: 15mm !important;
+                width: 210mm !important;
+                min-width: 210mm !important;
+                max-width: 210mm !important;
+                min-height: 297mm !important;
+                border: none !important;
+                page-break-after: avoid !important;
+                page-break-inside: avoid !important;
             }
 
             @page {
@@ -402,174 +1038,126 @@
             display: none;
         }
 
-        #watermark {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 500px;
-  height: 500px;
-  transform: translate(-50%, -50%);
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  opacity: 0.09; /* perfect medical watermark */
-  z-index: 0;
-}
+        /* Loading State */
+        .loading {
+            pointer-events: none;
+            opacity: 0.6;
+        }
 
-/* Make sure content stays above watermark */
-.prescription * {
-  position: relative;
-  z-index: 2;
-}
+        /* Utility Classes */
+        .text-center {
+            text-align: center;
+        }
 
-#watermark {
-  z-index: 1;
-}
-/* ========== RESPONSIVE WRAPPER ========== */
-.rx-wrapper {
-  display: flex;
-  justify-content: center;
-  overflow-x: auto;
-}
+        .mt-2 {
+            margin-top: 1rem;
+        }
 
-/* Default (Desktop) */
-.prescription {
-  transform-origin: top center;
-}
+        .mb-2 {
+            margin-bottom: 1rem;
+        }
 
-/* ---------- Tablets ---------- */
-@media (max-width: 1024px) {
-  .prescription {
-    transform: scale(0.9);
-  }
-}
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: var(--primary-color);
+            color: white;
+        }
 
-/* ---------- Small Tablets ---------- */
-@media (max-width: 900px) {
-  .prescription {
-    transform: scale(0.85);
-  }
-}
+        .badge-success {
+            background: var(--success-color);
+        }
 
-/* ---------- Large Phones ---------- */
-@media (max-width: 768px) {
-  .prescription {
-    transform: scale(0.8);
-  }
-
-  .rx-header {
-    grid-template-columns: 1fr;
-    text-align: center;
-  }
-
-  .header-right {
-    text-align: center;
-    margin-top: 10px;
-  }
-
-  .patient-info {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .patient-right {
-    text-align: left;
-  }
-}
-
-/* ---------- Small Phones ---------- */
-@media (max-width: 480px) {
-  .prescription {
-    transform: scale(0.7);
-  }
-
-  .form-panel {
-    padding: 15px;
-  }
-
-  .rx-symbol {
-    font-size: 36px;
-  }
-}
-@media (max-width: 600px) {
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .button-group {
-    flex-direction: column;
-  }
-
-  .btn {
-    width: 100%;
-  }
-}
-@media print {
-  .prescription {
-    transform: none !important;
-  }
-}
-.table-wrapper {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.medicine-table {
-  min-width: 800px; /* important */
-}
-.modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.4);
-  z-index: 9999;
-}
-
-.modal-content {
-  background: #fff;
-  padding: 20px;
-  max-width: 320px;
-  margin: 10% auto;
-  border-radius: 8px;
-  text-align: center;
-}
-
-
+        .badge-warning {
+            background: var(--warning-color);
+        }
     </style>
 </head>
 <body>
+    <!-- App Header -->
+    <div class="app-header">
+        <button class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">🌙</button>
+        <h1>📋 Ultimate E-Prescription Generator Pro</h1>
+        <p>Professional Medical Prescription System with Advanced Features</p>
+        <div class="stats">
+            <div class="stat-item">
+                <span>📊 Total Prescriptions:</span>
+                <strong id="totalPrescriptions">0</strong>
+            </div>
+            <div class="stat-item">
+                <span>📅 Today:</span>
+                <strong id="todayPrescriptions">0</strong>
+            </div>
+            <div class="stat-item">
+                <span>🔒 Data Stored Locally</span>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
-        <h1 style="margin:10px;">E-Prescription Web App</h1>
+        <!-- Disclaimer -->
+        <div class="disclaimer">
+            <strong>⚠️ Privacy & Medical Disclaimer:</strong>
+            All prescription data is stored locally in your browser. No data is sent to any server. This tool is for authorized medical professionals only. By using this tool, you agree to comply with all applicable medical regulations and laws. The developers are not liable for any misuse.
+        </div>
+
+        <!-- Quick Actions Bar -->
+        <div class="quick-actions">
+            <button class="btn btn-secondary btn-sm" onclick="toggleHistory()">
+                📜 History (<span id="historyCount">0</span>)
+            </button>
+            <button class="btn btn-success btn-sm" onclick="loadLastPrescription()">
+                🔄 Load Last Prescription
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="showPatientSearch()">
+                🔍 Search Patient
+            </button>
+            <button class="btn btn-add btn-sm" onclick="exportSettings()">
+                📤 Export Settings
+            </button>
+            <button class="btn btn-add btn-sm" onclick="importSettings()">
+                📥 Import Settings
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="clearAllData()">
+                🗑️ Clear All Data
+            </button>
+        </div>
 
         <!-- Form Panel -->
         <div class="form-panel" id="formPanel">
-            <h2>E-Prescription</h2>
+            <h2>📝 Prescription Details</h2>
 
-            <h3>👨‍⚕️ Doctor & Clinic Information</h3>
+            <h3 class="section-header">
+                <span>👨‍⚕️ Doctor & Clinic Information</span>
+                <span class="badge">Auto-saved</span>
+            </h3>
             <div class="form-grid">
                 <div class="form-group">
                     <label>Doctor Name *</label>
-                    <input type="text" id="doctorName" placeholder="Dr. Harsh Vadgave">
+                    <input type="text" id="doctorName" placeholder="Dr. John Smith" onchange="autoSaveDraft()">
                 </div>
                 <div class="form-group">
                     <label>Qualifications *</label>
-                    <input type="text" id="qualifications" placeholder="M.B.B.S., M.D., M.S.">
+                    <input type="text" id="qualifications" placeholder="M.B.B.S., M.D." onchange="autoSaveDraft()">
                 </div>
                 <div class="form-group">
                     <label>Registration No *</label>
-                    <input type="text" id="regNo" placeholder="XXXXXXX">
+                    <input type="text" id="regNo" placeholder="MCI-12345" onchange="autoSaveDraft()">
                 </div>
                 <div class="form-group">
                     <label>Mobile No *</label>
-                    <input type="text" id="doctorMobile" placeholder="7841811323">
+                    <input type="text" id="doctorMobile" placeholder="+91 98765 43210" onchange="autoSaveDraft()">
                 </div>
             </div>
 
             <div class="form-grid">
                 <div class="form-group">
                     <label>Clinic Name *</label>
-                    <input type="text" id="clinicName" placeholder="Clinic">
+                    <input type="text" id="clinicName" placeholder="Healthcare Clinic" onchange="autoSaveDraft()">
                 </div>
                 <div class="form-group">
                     <label>Clinic Logo</label>
@@ -577,32 +1165,35 @@
                 </div>
                 <div class="form-group">
                     <label>Clinic Address *</label>
-                    <textarea id="clinicAddress" placeholder="Clinic Address will be here"></textarea>
+                    <textarea id="clinicAddress" placeholder="123 Medical Street, City - 411001" onchange="autoSaveDraft()"></textarea>
                 </div>
                 <div class="form-group">
                     <label>Clinic Phone *</label>
-                    <input type="text" id="clinicPhone" placeholder="7841811323">
+                    <input type="text" id="clinicPhone" placeholder="+91 20 1234 5678" onchange="autoSaveDraft()">
                 </div>
                 <div class="form-group">
                     <label>Timings *</label>
-                    <input type="text" id="timings" placeholder="09:00 AM - 02:00 PM">
+                    <input type="text" id="timings" placeholder="09:00 AM - 06:00 PM" onchange="autoSaveDraft()">
                 </div>
                 <div class="form-group">
                     <label>Closed Day</label>
-                    <input type="text" id="closedDay" placeholder="Thursday">
+                    <input type="text" id="closedDay" placeholder="Sunday" onchange="autoSaveDraft()">
                 </div>
             </div>
 
-            <h3>👤 Patient Information</h3>
+            <h3 class="section-header">👤 Patient Information</h3>
             <div class="form-grid">
                 <div class="form-group">
-                    <label>Patient Name</label>
-                    <input type="text" id="patientId" placeholder="696 - DEMO PATIENT">
+                    <label>Patient ID</label>
+                    <input type="text" id="patientId" placeholder="PT-2025-001" onchange="autoSaveDraft()">
                 </div>
-               
+                <div class="form-group">
+                    <label>Patient Name *</label>
+                    <input type="text" id="patientName" placeholder="Enter patient name" onchange="autoSaveDraft()">
+                </div>
                 <div class="form-group">
                     <label>Gender *</label>
-                    <select id="patientGender">
+                    <select id="patientGender" onchange="autoSaveDraft()">
                         <option value="M">Male (M)</option>
                         <option value="F">Female (F)</option>
                         <option value="O">Other (O)</option>
@@ -610,170 +1201,330 @@
                 </div>
                 <div class="form-group">
                     <label>Address</label>
-                    <input type="text" id="patientAddress" placeholder="MUMBAI">
+                    <input type="text" id="patientAddress" placeholder="City, State" onchange="autoSaveDraft()">
                 </div>
                 <div class="form-group">
                     <label>Temperature (°F)</label>
-                    <input type="text" id="temperature" placeholder="98">
+                    <input type="text" id="temperature" placeholder="98.6" onchange="autoSaveDraft()">
                 </div>
                 <div class="form-group">
                     <label>BP (mmHg)</label>
-                    <input type="text" id="bp" placeholder="120/80">
+                    <input type="text" id="bp" placeholder="120/80" onchange="autoSaveDraft()">
                 </div>
                 <div class="form-group">
                     <label>Date & Time</label>
-                    <input type="datetime-local" id="dateTime">
+                    <input type="datetime-local" id="dateTime" onchange="autoSaveDraft()">
                 </div>
             </div>
 
-            <h3>💊 Medicines</h3>
+            <h3 class="section-header">💊 Medicines <span class="badge-warning badge">Type to search</span></h3>
             <div class="table-wrapper">
-            <table class="medicine-table" id="medicineTable">
-                <thead>
-                    <tr>
-                        <th style="width: 5%">#</th>
-                        <th style="width: 25%">Medicine Name</th>
-                        <th style="width: 30%">Dosage Instructions</th>
-                        <th style="width: 15%">Duration (Days)</th>
-                        <th style="width: 15%">Total</th>
-                        <th style="width: 10%">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="medicineRows">
-                </tbody>
-            </table>
+                <table class="medicine-table" id="medicineTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%">#</th>
+                            <th style="width: 25%">Medicine Name</th>
+                            <th style="width: 30%">Dosage Instructions</th>
+                            <th style="width: 15%">Duration (Days)</th>
+                            <th style="width: 15%">Total</th>
+                            <th style="width: 10%">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="medicineRows">
+                    </tbody>
+                </table>
             </div>
             <button class="btn btn-add" onclick="addMedicineRow()">+ Add Medicine</button>
 
-            <h3>📝 Advice</h3>
+            <h3 class="section-header">📝 Advice & Follow-up</h3>
             <div class="form-group">
-                <label>Advice Given</label>
-                <textarea id="advice" placeholder="* AVOID OILY AND SPICY FOOD" rows="3"></textarea>
+                <label>Medical Advice</label>
+                <textarea id="advice" placeholder="Enter medical advice for the patient" rows="4" onchange="autoSaveDraft()"></textarea>
             </div>
 
             <div class="form-group">
                 <label>Follow-up Date</label>
-                <input type="date" id="followUpDate">
+                <input type="date" id="followUpDate" onchange="autoSaveDraft()">
             </div>
 
             <div class="button-group">
-                <button class="btn btn-primary" onclick="generatePrescription()">📄 Generate Prescription</button>
-                <button class="btn btn-secondary" onclick="printPrescription()">🖨️ Print</button>
-                <button class="btn btn-secondary" onclick="openDonate()">☕ Support / Donate</button>
-
+                <button class="btn btn-primary" onclick="generatePrescription()" title="Ctrl+G">
+                    📄 Generate Prescription
+                </button>
+                <button class="btn btn-secondary" onclick="printPrescription()" title="Ctrl+P">
+                    🖨️ Print
+                </button>
+                <button class="btn btn-add" onclick="openDonate()">
+                    ☕ Support Developer
+                </button>
             </div>
         </div>
 
-        <!-- Prescription -->
-         
-        <div class="prescription" id="prescription">
-              <!-- Watermark -->
-              <div id="watermark"></div>
-            <!-- Header -->
-            <div class="rx-header">
-                <div class="header-left">
-                    <div class="doctor-name" id="displayDoctorName">Dr. Harsh Vadgave</div>
-                    <div class="degree" id="displayDegree">M.B.B.S., M.D., M.S. | Reg. No: XXXXXXX</div>
-                    <div>Mob. No: <span id="displayDoctorMobile">7841811323</span></div>
-                </div>
-               <div class="header-center">
-                <img id="clinicLogo" class="clinic-logo" alt="Clinic Logo">
-                <div class="clinic-name-center" id="displayClinicNameCenter">LOREM IPSUM</div>
-                </div>
+        <!-- Prescription Preview -->
+        <div class="prescription-container">
+            <h2 class="preview-title text-center">📄 Prescription Preview</h2>
+            <p class="scroll-hint">👈 Swipe left/right to view full prescription 👉</p>
+            <div class="prescription-wrapper">
+                <div class="prescription" id="prescription">
+                    <!-- Watermark -->
+                    <div id="watermark"></div>
 
-                <div class="header-right">
-                    <div class="clinic-name" id="displayClinicName">Care Clinic</div>
-                    <div id="displayClinicAddress">Clinic Address will be here<br>4XXXXX</div>
-                    <div>Ph: <span id="displayClinicPhone">7841811323</span>, Timing: <span id="displayTimings">09:00<br>AM - 02:00 PM</span> | Closed: <span id="displayClosedDay">Thursday</span></div>
-                </div>
-            </div>
+                    <!-- Header -->
+                    <div class="rx-header">
+                        <div class="header-left">
+                            <div class="doctor-name" id="displayDoctorName">Dr. John Smith</div>
+                            <div class="degree" id="displayDegree">M.B.B.S., M.D. | Reg. No: MCI-12345</div>
+                            <div>Mob: <span id="displayDoctorMobile">+91 98765 43210</span></div>
+                        </div>
+                        <div class="header-center">
+                            <img id="clinicLogo" class="clinic-logo" alt="Clinic Logo" style="display: none;">
+                            <div class="clinic-name-center" id="displayClinicNameCenter">HEALTHCARE CLINIC</div>
+                        </div>
+                        <div class="header-right">
+                            <div class="clinic-name" id="displayClinicName">Healthcare Clinic</div>
+                            <div id="displayClinicAddress">123 Medical Street<br>City - 411001</div>
+                            <div>Ph: <span id="displayClinicPhone">+91 20 1234 5678</span></div>
+                            <div>Timing: <span id="displayTimings">09:00 AM - 06:00 PM</span></div>
+                            <div>Closed: <span id="displayClosedDay">Sunday</span></div>
+                        </div>
+                    </div>
 
-            <!-- Patient Info -->
-            <div class="patient-info">
-                <div class="patient-left">
-                    <div class="patient-details">
-                        <div class="patient-id" id="displayPatientId">Name: 266 - DEMO PATIENT (M)</div>
-                        <div>Address: <span id="displayPatientAddress">PUNE</span></div>
-                        <div>Temp (deg): <span id="displayTemp">98</span>, BP: <span id="displayBP">120/80</span> mmHg</div>
+                    <!-- Patient Info -->
+                    <div class="patient-info">
+                        <div class="patient-left">
+                            <div class="patient-details">
+                                <div class="patient-id" id="displayPatientId">ID: PT-2025-001 (M)</div>
+                                <div><strong>Name:</strong> <span id="displayPatientName">Patient Name</span></div>
+                                <div>Address: <span id="displayPatientAddress">City, State</span></div>
+                                <div>Temp: <span id="displayTemp">98.6</span>°F, BP: <span id="displayBP">120/80</span> mmHg</div>
+                            </div>
+                        </div>
+                        <div class="patient-right">
+                            <div class="date-time" id="displayDateTime">Date: 28-Jan-2025, 02:30 PM</div>
+                        </div>
+                    </div>
+
+                    <!-- Medicines Table -->
+                    <table class="medicines-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 40%">Medicine Name</th>
+                                <th style="width: 35%">Dosage</th>
+                                <th style="width: 25%">Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody id="displayMedicines">
+                            <tr>
+                                <td class="medicine-name">1) TAB. PARACETAMOL 500mg</td>
+                                <td class="dosage-details">1 Tablet twice daily<br>(After Food)</td>
+                                <td>5 Days<br>(Total: 10 Tablets)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Advice -->
+                    <div class="advice-section">
+                        <h4>Medical Advice:</h4>
+                        <div class="advice-content" id="displayAdvice">• Avoid oily and spicy food
+• Drink plenty of water
+• Take adequate rest</div>
+                    </div>
+
+                    <!-- Follow-up -->
+                    <div class="follow-up" id="displayFollowUp">Follow-up: As needed</div>
+
+                    <!-- Signature -->
+                    <div class="signature-area">
+                        <div class="signature-line">Doctor's Signature</div>
+                        <div class="signature-name" id="displaySignatureName">Dr. John Smith</div>
+                        <div class="signature-degree" id="displaySignatureDegree">M.B.B.S., M.D.</div>
                     </div>
                 </div>
-                <div class="patient-right">
-                    <div class="date-time" id="displayDateTime">Date: 27-Apr-2020, 04:37 PM</div>
-                </div>
-            </div>
-
-            <!-- Medicines Table -->
-            <table class="medicines-table">
-                <thead>
-                    <tr>
-                        <th style="width: 40%">Medicine Name</th>
-                        <th style="width: 35%">Dosage</th>
-                        <th style="width: 25%">Duration</th>
-                    </tr>
-                </thead>
-                <tbody id="displayMedicines">
-                    <tr>
-                        <td class="medicine-name">1) TAB. DEMO MEDICINE 1</td>
-                        <td class="dosage-details">1 Morning, 1 Night<br>(Before Food)</td>
-                        <td>10 Days<br>(Tot:20 Tab)</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <!-- Advice -->
-            <div class="advice-section">
-                <h4>Advice Given:</h4>
-                <div class="advice-content" id="displayAdvice">* No Advice by the doctor still. </div>
-            </div>
-
-            <!-- Follow-up -->
-            <div class="follow-up" id="displayFollowUp">Follow Up: __-__-____</div>
-
-            <!-- Signature -->
-            <div class="signature-area">
-                <div class="signature-line">Signature</div>
-                <div class="signature-name" id="displaySignatureName">Dr. Harsh Vadgave</div>
-                <div class="signature-degree" id="displaySignatureDegree">M.B.B.S., M.D., M.S.</div>
             </div>
         </div>
     </div>
 
+    <!-- History Sidebar -->
+    <div class="history-sidebar" id="historySidebar">
+        <div class="history-header">
+            <h3>📜 Prescription History</h3>
+            <button class="close-history" onclick="toggleHistory()">✕</button>
+        </div>
+        <div class="history-content" id="historyContent">
+            <p style="text-align: center; color: var(--text-light); padding: 2rem;">No prescriptions saved yet.</p>
+        </div>
+    </div>
 
+    <!-- Donate Modal -->
     <div id="donateModal" class="modal">
-  <div class="modal-content">
-    <h3>Support this project</h3>
-    <p>This tool is shared freely.  
-    If it helped you, you can support its development.</p>
+        <div class="modal-content">
+            <h3>☕ Support This Project</h3>
+            <p>This tool is shared freely. If it helped you, consider supporting its development!</p>
+            <div id="qrcode"></div>
+            <a href="upi://pay?pa=vadagavejyoti@okaxis&pn=Vadgave%20Jyoti"
+               class="btn btn-primary"
+               style="text-decoration:none; display:inline-flex;">
+                📱 Pay via UPI App
+            </a>
+            <p style="font-size:0.875rem;color:#64748b;margin-top:1rem;">
+                UPI ID: vadagavejyoti@okaxis
+            </p>
+            <button class="btn btn-secondary mt-2" onclick="closeDonate()">Close</button>
+        </div>
+    </div>
 
-    <div id="qrcode"></div>
+    <!-- Patient Search Modal -->
+    <div id="patientSearchModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <h3>🔍 Search Patient</h3>
+            <div class="form-group">
+                <input type="text" id="patientSearchInput" placeholder="Search by patient name or ID..." 
+                       style="width: 100%; margin-bottom: 1rem;" oninput="searchPatients()">
+            </div>
+            <div id="patientSearchResults" style="max-height: 300px; overflow-y: auto;">
+            </div>
+            <button class="btn btn-secondary mt-2" onclick="closePatientSearch()">Close</button>
+        </div>
+    </div>
 
-    <a 
-  href="upi://pay?pa=vadagavejyoti@okaxis&pn=Vadgave%20Jyoti"
-  class="btn btn-primary"
-  style="text-decoration:none; display:inline-block;"
->
-📱 Pay via UPI App
-</a>
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
 
-    <p style="font-size:12px;color:#666;">
-      UPI ID: vadagavejyoti@okaxis
-    </p>
-
-    <button class="btn btn-primary" onclick="closeDonate()">Close</button>
-  </div>
-</div>
+    <!-- Import File Input (Hidden) -->
+    <input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="handleImport(event)">
 
     <script>
-        // Initialize
+        // Global Variables
         let medicineCount = 0;
+        let prescriptionHistory = [];
+        let commonMedicines = [
+            "TAB. PARACETAMOL 500mg",
+            "TAB. IBUPROFEN 400mg",
+            "TAB. AMOXICILLIN 500mg",
+            "TAB. AZITHROMYCIN 500mg",
+            "CAP. OMEPRAZOLE 20mg",
+            "TAB. CIPROFLOXACIN 500mg",
+            "TAB. METFORMIN 500mg",
+            "TAB. ATORVASTATIN 10mg",
+            "TAB. ASPIRIN 75mg",
+            "TAB. CETIRIZINE 10mg",
+            "SYR. AMBROXOL 30mg/5ml",
+            "TAB. PANTOPRAZOLE 40mg",
+            "TAB. DICLOFENAC 50mg",
+            "TAB. DOXYCYCLINE 100mg",
+            "CAP. FLUCONAZOLE 150mg"
+        ];
 
-        // Load saved data
+        // Initialize
         window.onload = function() {
             loadDoctorData();
+            loadDraft();
             setCurrentDateTime();
-            addMedicineRow(); // Add initial row
+            addMedicineRow();
+            loadPrescriptionHistory();
+            updateStats();
+            setupKeyboardShortcuts();
+            loadTheme();
         };
 
+        // Dark Mode
+        function toggleDarkMode() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            const btn = document.querySelector('.dark-mode-toggle');
+            btn.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            
+            showToast(newTheme === 'dark' ? 'Dark mode enabled' : 'Light mode enabled');
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            const btn = document.querySelector('.dark-mode-toggle');
+            btn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // Auto-save Draft
+        function autoSaveDraft() {
+            const draft = {
+                patientId: document.getElementById('patientId').value,
+                patientName: document.getElementById('patientName').value,
+                patientGender: document.getElementById('patientGender').value,
+                patientAddress: document.getElementById('patientAddress').value,
+                temperature: document.getElementById('temperature').value,
+                bp: document.getElementById('bp').value,
+                dateTime: document.getElementById('dateTime').value,
+                advice: document.getElementById('advice').value,
+                followUpDate: document.getElementById('followUpDate').value,
+                medicines: []
+            };
+
+            const medicineRows = document.querySelectorAll('#medicineRows tr');
+            medicineRows.forEach(row => {
+                draft.medicines.push({
+                    name: row.querySelector('[data-field="name"]').value,
+                    dosage: row.querySelector('[data-field="dosage"]').value,
+                    duration: row.querySelector('[data-field="duration"]').value,
+                    total: row.querySelector('[data-field="total"]').value
+                });
+            });
+
+            localStorage.setItem('prescriptionDraft', JSON.stringify(draft));
+        }
+
+        function loadDraft() {
+            const draft = localStorage.getItem('prescriptionDraft');
+            if (draft) {
+                const data = JSON.parse(draft);
+                document.getElementById('patientId').value = data.patientId || '';
+                document.getElementById('patientName').value = data.patientName || '';
+                document.getElementById('patientGender').value = data.patientGender || 'M';
+                document.getElementById('patientAddress').value = data.patientAddress || '';
+                document.getElementById('temperature').value = data.temperature || '';
+                document.getElementById('bp').value = data.bp || '';
+                document.getElementById('dateTime').value = data.dateTime || '';
+                document.getElementById('advice').value = data.advice || '';
+                document.getElementById('followUpDate').value = data.followUpDate || '';
+            }
+        }
+
+        // Keyboard Shortcuts
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    switch(e.key.toLowerCase()) {
+                        case 'g':
+                            e.preventDefault();
+                            generatePrescription();
+                            break;
+                        case 'p':
+                            e.preventDefault();
+                            printPrescription();
+                            break;
+                        case 's':
+                            e.preventDefault();
+                            autoSaveDraft();
+                            showToast('Draft saved!');
+                            break;
+                    }
+                }
+            });
+        }
+
+        // Toast Notification
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show' + (isError ? ' error' : '');
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3000);
+        }
+
+        // Load Doctor Data
         function loadDoctorData() {
             const doctorData = localStorage.getItem('doctorData');
             if (doctorData) {
@@ -815,6 +1566,7 @@
             document.getElementById('dateTime').value = `${year}-${month}-${day}T${hours}:${minutes}`;
         }
 
+        // Medicine Autocomplete
         function addMedicineRow() {
             medicineCount++;
             const tbody = document.getElementById('medicineRows');
@@ -822,19 +1574,67 @@
             row.className = 'medicine-row';
             row.innerHTML = `
                 <td>${medicineCount}</td>
-                <td><input type="text" placeholder="TAB./CAP./SYR. Medicine Name" data-field="name"></td>
-                <td><input type="text" placeholder="1 Morning, 1 Night (Before Food)" data-field="dosage"></td>
-                <td><input type="number" placeholder="10" data-field="duration"></td>
-                <td><input type="text" placeholder="Tot:20 Tab" data-field="total"></td>
+                <td>
+                    <div class="form-group" style="margin: 0;">
+                        <input type="text" placeholder="TAB. Medicine Name" data-field="name" 
+                               oninput="showMedicineAutocomplete(this)" onchange="autoSaveDraft()">
+                    </div>
+                </td>
+                <td><input type="text" placeholder="1 Tablet twice daily (After Food)" data-field="dosage" onchange="autoSaveDraft()"></td>
+                <td><input type="number" placeholder="5" data-field="duration" onchange="autoSaveDraft()"></td>
+                <td><input type="text" placeholder="Total: 10 Tablets" data-field="total" onchange="autoSaveDraft()"></td>
                 <td><button class="btn btn-danger" onclick="removeMedicineRow(this)">✕</button></td>
             `;
             tbody.appendChild(row);
         }
 
+        function showMedicineAutocomplete(input) {
+            closeAllAutocomplete();
+            
+            const val = input.value;
+            if (!val) return;
+
+            const matches = commonMedicines.filter(med => 
+                med.toLowerCase().includes(val.toLowerCase())
+            );
+
+            if (matches.length === 0) return;
+
+            const autocompleteDiv = document.createElement('div');
+            autocompleteDiv.className = 'autocomplete-items';
+            
+            matches.forEach(match => {
+                const item = document.createElement('div');
+                item.textContent = match;
+                item.addEventListener('click', function() {
+                    input.value = match;
+                    closeAllAutocomplete();
+                    autoSaveDraft();
+                });
+                autocompleteDiv.appendChild(item);
+            });
+
+            input.parentNode.appendChild(autocompleteDiv);
+        }
+
+        function closeAllAutocomplete() {
+            const items = document.getElementsByClassName('autocomplete-items');
+            Array.from(items).forEach(item => item.remove());
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.matches('input[data-field="name"]')) {
+                closeAllAutocomplete();
+            }
+        });
+
         function removeMedicineRow(btn) {
-            const row = btn.closest('tr');
-            row.remove();
-            updateMedicineNumbers();
+            if (document.querySelectorAll('#medicineRows tr').length > 1) {
+                const row = btn.closest('tr');
+                row.remove();
+                updateMedicineNumbers();
+                autoSaveDraft();
+            }
         }
 
         function updateMedicineNumbers() {
@@ -849,10 +1649,10 @@
             saveDoctorData();
 
             // Doctor Info
-            const doctorName = document.getElementById('doctorName').value || 'Dr. Onkar Bhave';
-            const qualifications = document.getElementById('qualifications').value || 'M.B.B.S., M.D., M.S.';
-            const regNo = document.getElementById('regNo').value || '2709881';
-            const doctorMobile = document.getElementById('doctorMobile').value || '8983390126';
+            const doctorName = document.getElementById('doctorName').value || 'Dr. John Smith';
+            const qualifications = document.getElementById('qualifications').value || 'M.B.B.S., M.D.';
+            const regNo = document.getElementById('regNo').value || 'MCI-12345';
+            const doctorMobile = document.getElementById('doctorMobile').value || '+91 98765 43210';
 
             document.getElementById('displayDoctorName').textContent = doctorName;
             document.getElementById('displayDegree').textContent = `${qualifications} | Reg. No: ${regNo}`;
@@ -861,27 +1661,29 @@
             document.getElementById('displaySignatureDegree').textContent = qualifications;
 
             // Clinic Info
-            const clinicName = document.getElementById('clinicName').value || 'Care Clinic';
-            const clinicAddress = document.getElementById('clinicAddress').value || 'Near Axis Bank, Kothrud, Pune - 411038';
-            const clinicPhone = document.getElementById('clinicPhone').value || '094233 80390';
-            const timings = document.getElementById('timings').value || '09:00 AM - 02:00 PM';
-            const closedDay = document.getElementById('closedDay').value || 'Thursday';
+            const clinicName = document.getElementById('clinicName').value || 'Healthcare Clinic';
+            const clinicAddress = document.getElementById('clinicAddress').value || '123 Medical Street, City - 411001';
+            const clinicPhone = document.getElementById('clinicPhone').value || '+91 20 1234 5678';
+            const timings = document.getElementById('timings').value || '09:00 AM - 06:00 PM';
+            const closedDay = document.getElementById('closedDay').value || 'Sunday';
 
             document.getElementById('displayClinicName').textContent = clinicName;
             document.getElementById('displayClinicNameCenter').textContent = clinicName.toUpperCase();
             document.getElementById('displayClinicAddress').innerHTML = clinicAddress.replace(/\n/g, '<br>');
             document.getElementById('displayClinicPhone').textContent = clinicPhone;
-            document.getElementById('displayTimings').innerHTML = timings.replace(/-/g, '<br>');
+            document.getElementById('displayTimings').textContent = timings;
             document.getElementById('displayClosedDay').textContent = closedDay;
 
             // Patient Info
-            const patientId = document.getElementById('patientId').value || '266 - DEMO PATIENT';
+            const patientId = document.getElementById('patientId').value || 'PT-2025-001';
+            const patientName = document.getElementById('patientName').value || 'Patient Name';
             const gender = document.getElementById('patientGender').value || 'M';
-            const patientAddress = document.getElementById('patientAddress').value || 'PUNE';
-            const temperature = document.getElementById('temperature').value || '98';
+            const patientAddress = document.getElementById('patientAddress').value || 'City, State';
+            const temperature = document.getElementById('temperature').value || '98.6';
             const bp = document.getElementById('bp').value || '120/80';
 
-            document.getElementById('displayPatientId').textContent = `PATIENT NAME: ${patientId} (${gender})`;
+            document.getElementById('displayPatientId').textContent = `ID: ${patientId} (${gender})`;
+            document.getElementById('displayPatientName').textContent = patientName;
             document.getElementById('displayPatientAddress').textContent = patientAddress;
             document.getElementById('displayTemp').textContent = temperature;
             document.getElementById('displayBP').textContent = bp;
@@ -899,6 +1701,7 @@
             const displayMedicines = document.getElementById('displayMedicines');
             displayMedicines.innerHTML = '';
 
+            let medicinesList = [];
             medicineRows.forEach((row, index) => {
                 const name = row.querySelector('[data-field="name"]').value;
                 const dosage = row.querySelector('[data-field="dosage"]').value;
@@ -910,27 +1713,45 @@
                     tr.innerHTML = `
                         <td class="medicine-name">${index + 1}) ${name}</td>
                         <td class="dosage-details">${dosage.replace(/,/g, ',<br>')}</td>
-                        <td>${duration} Days<br>${total}</td>
+                        <td>${duration ? duration + ' Days' : ''}<br>${total}</td>
                     `;
                     displayMedicines.appendChild(tr);
+                    
+                    medicinesList.push({ name, dosage, duration, total });
                 }
             });
 
             // Advice
-            const advice = document.getElementById('advice').value || '* AVOID OILY AND SPICY FOOD';
+            const advice = document.getElementById('advice').value || '• Take medicines as prescribed\n• Maintain proper hygiene';
             document.getElementById('displayAdvice').textContent = advice;
 
             // Follow-up
             const followUpDate = document.getElementById('followUpDate').value;
             if (followUpDate) {
                 const followUpFormatted = formatDate(new Date(followUpDate));
-                document.getElementById('displayFollowUp').textContent = `Follow Up: ${followUpFormatted}`;
+                document.getElementById('displayFollowUp').textContent = `Follow-up: ${followUpFormatted}`;
             } else {
-                document.getElementById('displayFollowUp').textContent = '';
+                document.getElementById('displayFollowUp').textContent = 'Follow-up: As needed';
             }
 
+            // Save to History
+            savePrescriptionToHistory({
+                patientId,
+                patientName,
+                gender,
+                patientAddress,
+                temperature,
+                bp,
+                medicines: medicinesList,
+                advice,
+                followUpDate,
+                dateTime: dateTimeInput
+            });
+
             // Scroll to prescription
-            document.getElementById('prescription').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('prescription').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            showToast('Prescription generated successfully!');
         }
 
         function formatDateTime(date) {
@@ -938,9 +1759,11 @@
             const day = String(date.getDate()).padStart(2, '0');
             const month = months[date.getMonth()];
             const year = date.getFullYear();
-            const hours = String(date.getHours()).padStart(2, '0');
+            let hours = date.getHours();
             const minutes = String(date.getMinutes()).padStart(2, '0');
-            return `${day}-${month}-${year}, ${hours}:${minutes} ${date.getHours() >= 12 ? 'PM' : 'AM'}`;
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12;
+            return `${day}-${month}-${year}, ${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
         }
 
         function formatDate(date) {
@@ -950,58 +1773,344 @@
             return `${day}-${month}-${year}`;
         }
 
-       
+        // Prescription History
+        function savePrescriptionToHistory(data) {
+            const history = JSON.parse(localStorage.getItem('prescriptionHistory') || '[]');
+            
+            const prescription = {
+                id: Date.now(),
+                ...data,
+                createdAt: new Date().toISOString()
+            };
+            
+            history.unshift(prescription);
+            
+            // Keep last 100 prescriptions
+            if (history.length > 100) {
+                history.pop();
+            }
+            
+            localStorage.setItem('prescriptionHistory', JSON.stringify(history));
+            updateStats();
+            loadPrescriptionHistory();
+        }
 
+        function loadPrescriptionHistory() {
+            const history = JSON.parse(localStorage.getItem('prescriptionHistory') || '[]');
+            prescriptionHistory = history;
+            
+            const historyContent = document.getElementById('historyContent');
+            const historyCount = document.getElementById('historyCount');
+            
+            historyCount.textContent = history.length;
+            
+            if (history.length === 0) {
+                historyContent.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 2rem;">No prescriptions saved yet.</p>';
+                return;
+            }
+            
+            historyContent.innerHTML = '';
+            
+            history.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `
+                    <div class="history-item-header">
+                        <div class="history-item-title">${item.patientName}</div>
+                        <div class="history-item-date">${new Date(item.createdAt).toLocaleDateString()}</div>
+                    </div>
+                    <div class="history-item-details">
+                        <div>ID: ${item.patientId} (${item.gender})</div>
+                        <div>${item.medicines.length} medicine(s) prescribed</div>
+                    </div>
+                    <div class="history-actions">
+                        <button class="btn btn-primary btn-sm" onclick="loadPrescriptionFromHistory(${item.id})">
+                            📋 Load
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deletePrescription(${item.id})">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                `;
+                historyContent.appendChild(div);
+            });
+        }
+
+        function loadPrescriptionFromHistory(id) {
+            const prescription = prescriptionHistory.find(p => p.id === id);
+            if (!prescription) return;
+            
+            document.getElementById('patientId').value = prescription.patientId || '';
+            document.getElementById('patientName').value = prescription.patientName || '';
+            document.getElementById('patientGender').value = prescription.gender || 'M';
+            document.getElementById('patientAddress').value = prescription.patientAddress || '';
+            document.getElementById('temperature').value = prescription.temperature || '';
+            document.getElementById('bp').value = prescription.bp || '';
+            document.getElementById('advice').value = prescription.advice || '';
+            document.getElementById('followUpDate').value = prescription.followUpDate || '';
+            
+            // Clear existing medicine rows
+            document.getElementById('medicineRows').innerHTML = '';
+            medicineCount = 0;
+            
+            // Add medicine rows
+            if (prescription.medicines && prescription.medicines.length > 0) {
+                prescription.medicines.forEach(med => {
+                    addMedicineRow();
+                    const rows = document.querySelectorAll('#medicineRows tr');
+                    const lastRow = rows[rows.length - 1];
+                    lastRow.querySelector('[data-field="name"]').value = med.name || '';
+                    lastRow.querySelector('[data-field="dosage"]').value = med.dosage || '';
+                    lastRow.querySelector('[data-field="duration"]').value = med.duration || '';
+                    lastRow.querySelector('[data-field="total"]').value = med.total || '';
+                });
+            } else {
+                addMedicineRow();
+            }
+            
+            toggleHistory();
+            showToast('Prescription loaded successfully!');
+            
+            // Scroll to form
+            document.getElementById('formPanel').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function deletePrescription(id) {
+            if (!confirm('Are you sure you want to delete this prescription?')) return;
+            
+            const history = prescriptionHistory.filter(p => p.id !== id);
+            localStorage.setItem('prescriptionHistory', JSON.stringify(history));
+            loadPrescriptionHistory();
+            updateStats();
+            showToast('Prescription deleted');
+        }
+
+        function loadLastPrescription() {
+            if (prescriptionHistory.length === 0) {
+                showToast('No previous prescriptions found', true);
+                return;
+            }
+            
+            loadPrescriptionFromHistory(prescriptionHistory[0].id);
+        }
+
+        function toggleHistory() {
+            const sidebar = document.getElementById('historySidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        // Patient Search
+        function showPatientSearch() {
+            document.getElementById('patientSearchModal').style.display = 'block';
+            document.getElementById('patientSearchInput').focus();
+            searchPatients();
+        }
+
+        function closePatientSearch() {
+            document.getElementById('patientSearchModal').style.display = 'none';
+        }
+
+        function searchPatients() {
+            const searchTerm = document.getElementById('patientSearchInput').value.toLowerCase();
+            const resultsDiv = document.getElementById('patientSearchResults');
+            
+            if (!searchTerm) {
+                resultsDiv.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 2rem;">Start typing to search...</p>';
+                return;
+            }
+            
+            const matches = prescriptionHistory.filter(p => 
+                p.patientName.toLowerCase().includes(searchTerm) ||
+                p.patientId.toLowerCase().includes(searchTerm)
+            );
+            
+            if (matches.length === 0) {
+                resultsDiv.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 2rem;">No patients found</p>';
+                return;
+            }
+            
+            resultsDiv.innerHTML = '';
+            matches.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.style.cursor = 'pointer';
+                div.innerHTML = `
+                    <div class="history-item-title">${item.patientName}</div>
+                    <div class="history-item-details">
+                        <div>ID: ${item.patientId}</div>
+                        <div>Last visit: ${new Date(item.createdAt).toLocaleDateString()}</div>
+                    </div>
+                `;
+                div.onclick = () => {
+                    loadPrescriptionFromHistory(item.id);
+                    closePatientSearch();
+                };
+                resultsDiv.appendChild(div);
+            });
+        }
+
+        // Statistics
+        function updateStats() {
+            const history = JSON.parse(localStorage.getItem('prescriptionHistory') || '[]');
+            const today = new Date().toDateString();
+            const todayCount = history.filter(p => new Date(p.createdAt).toDateString() === today).length;
+            
+            document.getElementById('totalPrescriptions').textContent = history.length;
+            document.getElementById('todayPrescriptions').textContent = todayCount;
+        }
+
+        // Export/Import Settings
+        function exportSettings() {
+            const data = {
+                doctorData: JSON.parse(localStorage.getItem('doctorData') || '{}'),
+                prescriptionHistory: JSON.parse(localStorage.getItem('prescriptionHistory') || '[]'),
+                clinicLogo: localStorage.getItem('clinicLogo'),
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `prescription-backup-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast('Settings exported successfully!');
+        }
+
+        function importSettings() {
+            document.getElementById('importFileInput').click();
+        }
+
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (data.doctorData) {
+                        localStorage.setItem('doctorData', JSON.stringify(data.doctorData));
+                        loadDoctorData();
+                    }
+                    
+                    if (data.prescriptionHistory) {
+                        localStorage.setItem('prescriptionHistory', JSON.stringify(data.prescriptionHistory));
+                        loadPrescriptionHistory();
+                        updateStats();
+                    }
+                    
+                    if (data.clinicLogo) {
+                        localStorage.setItem('clinicLogo', data.clinicLogo);
+                        document.getElementById('clinicLogo').src = data.clinicLogo;
+                        document.getElementById('clinicLogo').style.display = 'block';
+                        document.getElementById('watermark').style.backgroundImage = `url(${data.clinicLogo})`;
+                    }
+                    
+                    showToast('Settings imported successfully!');
+                    location.reload();
+                } catch (error) {
+                    showToast('Error importing file. Please check the file format.', true);
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        }
+
+        // Clear Data
+        function clearAllData() {
+            if (!confirm('Are you sure you want to clear ALL data? This cannot be undone!')) return;
+            
+            if (!confirm('This will delete all prescriptions, settings, and history. Are you ABSOLUTELY sure?')) return;
+            
+            localStorage.removeItem('prescriptionHistory');
+            localStorage.removeItem('prescriptionDraft');
+            
+            loadPrescriptionHistory();
+            updateStats();
+            
+            // Clear form
+            document.getElementById('patientId').value = '';
+            document.getElementById('patientName').value = '';
+            document.getElementById('patientAddress').value = '';
+            document.getElementById('temperature').value = '';
+            document.getElementById('bp').value = '';
+            document.getElementById('advice').value = '';
+            document.getElementById('followUpDate').value = '';
+            
+            document.getElementById('medicineRows').innerHTML = '';
+            medicineCount = 0;
+            addMedicineRow();
+            
+            setCurrentDateTime();
+            
+            showToast('All prescription data cleared!');
+        }
+
+        // Print
         function printPrescription() {
             window.print();
         }
 
-
+        // Logo handling
         const logoInput = document.getElementById("clinicLogoInput");
         const clinicLogo = document.getElementById("clinicLogo");
         const watermark = document.getElementById("watermark");
 
-
-
-        /* Load saved logo */
+        // Load saved logo
         const savedLogo = localStorage.getItem("clinicLogo");
-if (savedLogo && clinicLogo) {
-    clinicLogo.src = savedLogo;
-    watermark.style.backgroundImage = `url(${savedLogo})`;
-}
+        if (savedLogo && clinicLogo) {
+            clinicLogo.src = savedLogo;
+            clinicLogo.style.display = 'block';
+            watermark.style.backgroundImage = `url(${savedLogo})`;
+        }
 
-        /* Upload logo */
-        logoInput.addEventListener("change", function () {
-    const file = this.files[0];
-    if (!file) return;
+        // Upload logo
+        logoInput.addEventListener("change", function() {
+            const file = this.files[0];
+            if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-        const img = reader.result;
+            const reader = new FileReader();
+            reader.onload = () => {
+                const img = reader.result;
+                clinicLogo.src = img;
+                clinicLogo.style.display = 'block';
+                watermark.style.backgroundImage = `url(${img})`;
+                localStorage.setItem("clinicLogo", img);
+                showToast('Logo uploaded successfully!');
+            };
+            reader.readAsDataURL(file);
+        });
 
-        clinicLogo.src = img;
-        watermark.style.backgroundImage = `url(${img})`;
+        // Donate modal
+        function openDonate() {
+            document.getElementById("donateModal").style.display = "block";
+        }
 
-        localStorage.setItem("clinicLogo", img);
-    };
-    reader.readAsDataURL(file);
-});
+        function closeDonate() {
+            document.getElementById("donateModal").style.display = "none";
+        }
 
-function openDonate() {
-  document.getElementById("donateModal").style.display = "block";
-}
-function closeDonate() {
-  document.getElementById("donateModal").style.display = "none";
-}
+        // Generate QR Code
+        new QRCode(document.getElementById("qrcode"), {
+            text: "upi://pay?pa=vadagavejyoti@okaxis&pn=Vadgave%20Jyoti",
+            width: 180,
+            height: 180
+        });
 
-new QRCode(document.getElementById("qrcode"), {
-  text: "upi://pay?pa=vadagavejyoti@okaxis&pn=Vadagave%20Jyoti",
-  width: 180,
-  height: 180
-});
-</script>
+        // Close modal on outside click
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>
-
-
-
